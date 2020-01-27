@@ -7,7 +7,7 @@ import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import query.Query;
-import twitter.PlaybackTwitterSource;
+import twitter.LiveTwitterSource;
 import twitter.TwitterSource;
 import util.SphericalGeometry;
 
@@ -34,14 +34,7 @@ public class Application extends JFrame {
     private TwitterSource twitterSource;
 
     private void initialize() {
-        // To use the live twitter stream, use the following line
-        // twitterSource = new LiveTwitterSource();
-
-        // To use the recorded twitter stream, use the following line
-        // The number passed to the constructor is a speedup value:
-        //  1.0 - play back at the recorded speed
-        //  2.0 - play back twice as fast
-        twitterSource = new PlaybackTwitterSource(60.0);
+        twitterSource = new LiveTwitterSource();
 
         queries = new ArrayList<>();
     }
@@ -55,7 +48,7 @@ public class Application extends JFrame {
         Set<String> allterms = getQueryTerms();
         twitterSource.setFilterTerms(allterms);
         contentPanel.addQuery(query);
-        // TODO: This is the place where you should connect the new query to the twitter source
+        twitterSource.addObserver(query);
     }
 
     /**
@@ -188,7 +181,7 @@ public class Application extends JFrame {
 
     // A query has been deleted, remove all traces of it
     public void terminateQuery(Query query) {
-        // TODO: This is the place where you should disconnect the expiring query from the twitter source
+        twitterSource.deleteObserver(query);
         queries.remove(query);
         Set<String> allterms = getQueryTerms();
         twitterSource.setFilterTerms(allterms);
