@@ -4,17 +4,13 @@ import filters.Filter;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
 import twitter4j.Status;
-import ui.MapMarkerImage;
-import ui.MapMarkerSimple;
+import ui.MapMarkerProfileImage;
 import util.Util;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
-import javax.imageio.ImageIO;
 
 /**
  * A query over the twitter stream.
@@ -79,21 +75,11 @@ public class Query implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        Status s = (Status) arg;
-        Image profileImage = null;
-        try {
-            profileImage = ImageIO.read( new URL(s.getUser().getMiniProfileImageURL()));
-        } catch (IOException e) {
-            e.printStackTrace();
+        Status tweet = (Status) arg;
+
+        if (filter.matches(tweet)) {
+            map.addMapMarker(new MapMarkerProfileImage(layer, Util.statusCoordinate(tweet), color, tweet));
         }
-        MapMarkerImage mapMarkerImage = new MapMarkerImage(layer, Util.statusCoordinate(s), color, profileImage);
-
-        if (filter.matches(s)) {
-            map.addMapMarker(mapMarkerImage);
-        }
-
-
-
     }
 }
 
