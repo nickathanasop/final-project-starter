@@ -5,33 +5,22 @@ import org.openstreetmap.gui.jmapviewer.Layer;
 import org.openstreetmap.gui.jmapviewer.MapObjectImpl;
 import org.openstreetmap.gui.jmapviewer.Style;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapRectangle;
+import util.ImageCache;
 
 import java.awt.*;
 
 public class MapRectangleHover extends MapObjectImpl implements MapRectangle {
     private Coordinate topLeft;
     private Coordinate bottomRight;
+    private MapMarkerProfileImage currentMapMarker;
 
-    public MapRectangleHover(Coordinate topLeft, Coordinate bottomRight) {
-        this((Layer) null, (String) null, (Style) null, topLeft, bottomRight);
-    }
-
-    public MapRectangleHover(String name, Coordinate topLeft, Coordinate bottomRight) {
-        this((Layer) null, name, (Style) null, topLeft, bottomRight);
-    }
-
-    public MapRectangleHover(Layer layer, Coordinate topLeft, Coordinate bottomRight) {
-        this(layer, (String) null, (Style) null, topLeft, bottomRight);
-    }
-
-    public MapRectangleHover(Layer layer, String name, Coordinate topLeft, Coordinate bottomRight) {
-        this(layer, name, (Style) null, topLeft, bottomRight);
-    }
-
-    public MapRectangleHover(Layer layer, String name, Style style, Coordinate topLeft, Coordinate bottomRight) {
-        super(layer, name, style);
-        this.topLeft = topLeft;
-        this.bottomRight = bottomRight;
+    public MapRectangleHover(MapMarkerProfileImage currentMapMarker) {
+        super(currentMapMarker.getLayer(), (String) null, currentMapMarker.getStyle());
+        topLeft = currentMapMarker.getCoordinate();
+        bottomRight = currentMapMarker.getCoordinate();
+        setColor(currentMapMarker.getColor());
+        setBackColor(currentMapMarker.getBackColor());
+        this.currentMapMarker = currentMapMarker;
     }
 
 
@@ -46,18 +35,21 @@ public class MapRectangleHover extends MapObjectImpl implements MapRectangle {
     }
 
     @Override
-    public void paint(Graphics g, Point topLeft, Point bottomright) {
+    public void paint(Graphics g, Point topLeft, Point bottomRight) {
         if (g instanceof Graphics2D && this.getBackColor() != null) {
             Graphics2D g2 = (Graphics2D)g;
-            Composite oldComposite = g2.getComposite();
-            g2.setComposite(AlphaComposite.getInstance(3));
+            //Composite oldComposite = g2.getComposite();
+            //g2.setComposite(AlphaComposite.getInstance(3));
             g2.setPaint(this.getBackColor());
-            g.fillRect(topLeft.x, topLeft.y, topLeft.x - bottomright.x, topLeft.y - bottomright.y);
-            g2.setComposite(oldComposite);
+            g.fillRect(topLeft.x - 20, topLeft.y + 30, 1000, 100);
+           // g2.setComposite(oldComposite);
         }
 
         g.setColor(this.getColor());
-        g.drawRect(topLeft.x, topLeft.y, topLeft.x - bottomright.x, topLeft.y - bottomright.y);
+        g.drawRect(topLeft.x - 20, topLeft.y + 30, 1000, 100);
+        Image profileImage = ImageCache.getInstance().getImage(currentMapMarker.getTweet().getUser().getProfileImageURL());
+        g.drawImage(profileImage, topLeft.x - 15, topLeft.y + 35, 90, 90,null,null);
+        g.drawString(currentMapMarker.getTweet().getText(), topLeft.x + 80, topLeft.y + 120);
         if (this.getLayer() == null || this.getLayer().isVisibleTexts()) {
             this.paintText(g, topLeft);
         }

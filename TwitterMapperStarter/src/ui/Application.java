@@ -3,10 +3,8 @@ package ui;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
-import org.openstreetmap.gui.jmapviewer.Style;
 import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapRectangle;
 import org.openstreetmap.gui.jmapviewer.tilesources.BingAerialTileSource;
 import query.Query;
 import twitter.LiveTwitterSource;
@@ -116,24 +114,18 @@ public class Application extends JFrame {
             public void mouseMoved(MouseEvent e) {
                 Point p = e.getPoint();
                 ICoordinate pos = map().getPosition(p);
-                ICoordinate pos2 = pos;
-                pos2.setLat(pos.getLat()+200);
-                pos2.setLon(pos.getLon()+200);
-                // TODO: Use the following method to set the text that appears at the mouse cursor
-                //MapMarkerProfileImage mp =  (MapMarkerProfileImage) getMarkersCovering(pos, 10).get(0);
-                //map().setToolTipText(mp.getTweet().getText());
-
-               List<MapMarker> mapMarkers = getMarkersCovering(pos, 500000000);
-               if (mapMarkers.size() > 0) {
-                   map().addMapRectangle(new MapRectangleHover(pos, pos2));
-               } else {
-                   map().setToolTipText("00000");
-               }
-
-
-               map().addMapRectangle();
-               map().repaint();
-
+                List<MapMarker> mapMarkers = getMarkersCovering(pos, pixelWidth(p));
+                if (mapMarkers.isEmpty()) {
+                    map().removeAllMapRectangles();
+                    map().repaint();
+                } else {
+                    MapMarkerProfileImage currentMapMarker = (MapMarkerProfileImage) mapMarkers.get(mapMarkers.size() - 1);
+                    if (!map().getMapRectangleList().contains(currentMapMarker)) {
+                        map().removeAllMapRectangles();
+                        map().addMapRectangle(new MapRectangleHover(currentMapMarker));
+                        map().repaint();
+                    }
+                }
             }
         });
     }
